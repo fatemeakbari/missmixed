@@ -1,0 +1,89 @@
+#########################################
+# Editor temporary/working/backup files #
+dist
+.venv
+.#*
+*\#*\#
+[#]*#
+*~
+*$
+*.bak
+*flymake*
+*.iml
+*.kdev4
+*.log
+*.swp
+*.pdb
+*.zip
+.project
+.pydevproject
+.settings
+.idea
+.vagrant
+.noseids
+.ipynb_checkpoints
+.tags
+.cache/
+.vscode/
+
+# Compiled source #
+###################
+*.a
+*.com
+*.class
+*.dll
+*.exe
+*.pxi
+*.o
+*.py[ocd]
+*.so
+.build_cache_dir
+.mesonpy-native-file.ini
+MANIFEST
+compile_commands.json
+debug
+.debug
+
+# Python files #
+################
+# setup.py working directory
+build
+# sphinx build directory
+doc/_build
+# setup.py dist directory
+dist
+# Egg metadata
+*.egg-info
+.eggs
+.pypirc
+# type checkers
+
+
+# pyenv
+.python-version
+
+# tox testing tool
+.tox
+# rope
+.ropeproject
+# wheel files
+*.whl
+**/wheelhouse/*
+pip-wheel-metadata
+# coverage
+.coverage
+coverage.xml
+coverage_html_report
+.mypy_cache
+*.pytest_cache
+.ruff_cache
+# hypothesis test database
+.hypothesis/
+__pycache__
+# pytest-monkeytype
+monkeytype.sqlite3
+# meson editable install folder
+.mesonpy
+
+
+
