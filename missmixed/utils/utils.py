@@ -74,23 +74,7 @@ class CategoricalListMaker:
         return categorical_list
 
 
-def X_y_generate(df_x, df_y):
-    df_x_normal = normalize(df_x.columns, df_x)
-    y = df_y.dropna()
-    X = df_x_normal.loc[y.index]
-    return X, y
 
-
-def normalize(col_names, df_x):
-    cols_min = []
-    cols_max = []
-    for col_name in col_names:
-        col_min = df_x[col_name].min()
-        col_max = df_x[col_name].max()
-        cols_min.append(col_min)
-        cols_max.append(col_max)
-        df_x[col_name] = ((df_x[col_name] - col_min) / (col_max - col_min)) * 10
-    return df_x
 
 def train_test_split(X, y, train_size=0.9):
     train_test_split_len = int(len(X) * train_size)

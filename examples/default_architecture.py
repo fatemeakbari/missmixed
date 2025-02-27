@@ -3,10 +3,10 @@ import numpy as np
 from missmixed import MissMixed, Sequential, CategoricalListMaker
 
 # Initialize data, sequential model, and categorical columns
-reference_data = pd.read_excel('Breast_Cancer_MCAR_10.xlsx')
-
+reference_data = pd.read_excel('LetterRecognition_MCAR_25.xlsx')
 categorical_list_maker = CategoricalListMaker(reference_data)
-categorical_columns = categorical_list_maker.make_categorical_list()
+categorical_columns = categorical_list_maker.make_categorical_list(categorical_columns=['xbox ', 'x2bar'])
+
 base_model = Sequential()
 
 # Create and run the MissMixed instance

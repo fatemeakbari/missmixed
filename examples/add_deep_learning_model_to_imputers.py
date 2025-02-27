@@ -6,10 +6,11 @@ from tensorflow import keras
 
 
 # Initialize data, sequential model, and categorical columns
-reference_data = pd.read_excel('Breast_Cancer_MCAR.xlsx')
+reference_data = pd.read_excel('LetterRecognition_MCAR_25.xlsx')
 categorical_list_maker = CategoricalListMaker(reference_data)
-categorical_columns = categorical_list_maker.make_categorical_list()
-
+print(reference_data.columns)
+categorical_columns = categorical_list_maker.make_categorical_list(
+    categorical_index=[i for i in range(reference_data.shape[1])])
 
 
 model = keras.Sequential()
@@ -19,18 +20,17 @@ model.add(keras.layers.Dense(units=512, activation='tanh'))
 model.add(keras.layers.Dropout(0.2))
 model.add(keras.layers.Dense(units=256, activation='tanh'))
 model.add(keras.layers.Dense(units=256, activation='relu'))
-model.add(keras.layers.Dense(units=1))
 
+early_stopping = [keras.callbacks.EarlyStopping(monitor='loss', patience=20, restore_best_weights=True)]
 
-regression_imputer = DeepModelImputer(model=model, epochs=200, batch_size=32,
+regression_imputer = DeepModelImputer(model=model, epochs=10, batch_size=64, callbacks=early_stopping,
                                       optimizer='adam',
                                       loss='mean_squared_error')
-classification_imputer = RandomForestClassifier(n_estimators=100,
-                                                max_depth=40,
-                                                n_jobs=-1,
-                                                max_features='sqrt',
-                                                min_samples_leaf=1,
-                                                min_samples_split=2)
+
+classification_imputer = DeepModelImputer(model=model, epochs=10, batch_size=64,
+                                      optimizer='adam',
+                                      callbacks=early_stopping,
+                                      loss='crossentropy')
 
 
 base_model = Sequential()
