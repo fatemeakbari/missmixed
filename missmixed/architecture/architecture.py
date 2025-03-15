@@ -107,7 +107,7 @@ Methods:
 
 
 class Sequential:
-    def __init__(self, reset: bool = False):
+    def __init__(self, reset: bool = False, trials: int = 1):
         """
         Initializes the Sequential class.
 
@@ -115,6 +115,7 @@ class Sequential:
             reset (bool): Whether to reset the imputers list. Default is False.
         """
         self.imputers: List[Imputer] = []
+        self.trials = trials
         if not reset:
             self.__build_default_imputers()
 
@@ -173,7 +174,7 @@ class Sequential:
 
         for model_type, max_features in models:
             regression_model, classification_model = self.__build_model(model_type, max_features)
-            self.add(regression_model, classification_model, trials=2)
+            self.add(regression_model, classification_model, trials=self.trials)
 
     def __build_model(self, model_type: str, max_features: Union[str, float]) -> Tuple[object, object]:
         """
