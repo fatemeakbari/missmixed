@@ -177,7 +177,7 @@ class MissMixed:
             int: The number of columns updated in this iteration.
         """
         updated_column_count = 0
-        columns_scores_history = {'train': [], 'test': []}
+        columns_scores_history = {'train': [], 'val': []}
         for col_idx in range(self.num_of_columns):
             self.shared.set_value('processing_col_idx', col_idx)
             # todo need to refactor
@@ -201,10 +201,10 @@ class MissMixed:
             if is_column_updated:
                 updated_column_count += 1
             columns_scores_history['train'].append(column_score['train'])
-            columns_scores_history['test'].append(column_score['test'])
+            columns_scores_history['val'].append(column_score['val'])
         # self._log(1, f'{updated_column_count} columns updated')
         self._log(1,
-                  f'Average {self.metric.__name__} train: {np.mean(columns_scores_history["train"])}, validation: {np.mean(columns_scores_history["test"])}')
+                  f'Average {self.metric.__name__} train: {np.mean(columns_scores_history["train"])}, validation: {np.mean(columns_scores_history["val"])}')
 
         return updated_column_count
 
@@ -221,7 +221,7 @@ class MissMixed:
                                                and a dictionary of metric scores for training and testing.
         """
         is_column_updated = False
-        column_score = {'train': [], 'test': []}
+        column_score = {'train': [], 'val': []}
         ds, impute_ds = self.__dataset_preparation(col_index)
         if len(ds['y_test']) >= 2:
             metric_scores, models = [], []
@@ -233,18 +233,18 @@ class MissMixed:
                 metric_scores.append(
                     {
                         'train': self.metric(ds['y_train'], y_pred_train),
-                        'test': self.metric(ds['y_test'], y_pred_test)
+                        'val': self.metric(ds['y_test'], y_pred_test)
                     }
                 )
                 models.append(imputer.copy())
 
-            best_index = np.argmax([m['test'] * self.metric_direction for m in metric_scores])
+            best_index = np.argmax([m['val'] * self.metric_direction for m in metric_scores])
             best_metric_score = metric_scores[best_index]
             column_score['train'].append(best_metric_score['train'])
-            column_score['test'].append(best_metric_score['test'])
+            column_score['val'].append(best_metric_score['val'])
 
             self._log(2, f"Best {self.metric.__name__} results: {best_metric_score}")
-            if self.__can_impute(col_index, best_metric_score['test']):
+            if self.__can_impute(col_index, best_metric_score['val']):
                 self.__apply_best_model(models[best_index], impute_ds, col_index)
                 is_column_updated = True
                 self._log(2, '-- Column updated --')
@@ -365,7 +365,7 @@ class MissMixed:
         """
         for i in range(self.num_of_columns):
             if self.categorical_columns[i]:
-                self.imputed_df.iloc[:, i] = self.column_to_encoder[i].inverse_transform(self.imputed_df.iloc[:, i])
+                self.imputed_df.iloc[:, i] = self.column_to_encoder[i].inverse_transform(self.imputed_df.iloc[:, i].astype('int64'))
 
         return {
             'imputed_data': self.imputed_df,
