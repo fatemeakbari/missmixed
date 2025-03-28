@@ -110,7 +110,7 @@ class MissMixed:
         for i in columns_to_be_dropped:
             del self.categorical_columns[i]
         if columns_to_be_dropped.size >= 1:
-            self._log(0, f'Columns with all NaN values {columns_to_be_dropped} are dropped')
+            self.__log(0, f'Columns with all NaN values {columns_to_be_dropped} are dropped')
         self.working_data.drop(columns=columns_to_be_dropped, inplace=True)
 
     def __process_categorical_data(self):
@@ -156,11 +156,11 @@ class MissMixed:
         # keep number of columns that updated per iteration
         updated_columns_count = []
         for idx, imputer in enumerate(self.__iteration_progress_bar()):
-            self._log(1, f'Iteration {idx + 1}/{len(self.sequential.imputers)}')
+            self.__log(1, f'Iteration {idx + 1}/{len(self.sequential.imputers)}')
             count = self.__process_each_imputer(imputer)
 
-            self._log(1, f'---- {count} columns updated ----')
-            self._log(1, '--' * 40)
+            self.__log(1, f'---- {count} columns updated ----')
+            self.__log(1, '--' * 40)
             updated_columns_count.append(count)
 
             if self.__check_early_stopping(updated_columns_count):
@@ -176,38 +176,40 @@ class MissMixed:
         Returns:
             int: The number of columns updated in this iteration.
         """
-        updated_column_count = 0
-        columns_scores_history = {'train': [], 'val': []}
-        for col_idx in range(self.num_of_columns):
-            self.shared.set_value('processing_col_idx', col_idx)
-            # todo need to refactor
-            is_categorical = self.categorical_columns[col_idx]
-            self.shared.set_value('is_categorical', self.categorical_columns[col_idx])
-            self.__set_metric()
-            imputer.set_model(is_categorical)
+        try:
+            updated_column_count = 0
+            columns_scores_history = {'train': [], 'val': []}
+            for col_idx in range(self.num_of_columns):
+                self.shared.set_value('processing_col_idx', col_idx)
+                # todo need to refactor
+                is_categorical = self.categorical_columns[col_idx]
+                self.shared.set_value('is_categorical', self.categorical_columns[col_idx])
+                self.__set_metric()
+                imputer.set_model(is_categorical)
 
-            if imputer.model is None:
-                self._log(2, f'Imputer skipped because not found proper imputer model')
-                continue
-            self._log(2, f"Imputing column {col_idx + 1}/{self.num_of_columns}")
+                if imputer.model is None:
+                    self.__log(2, f'Imputer skipped because not found proper imputer model')
+                    continue
+                self.__log(2, f"Imputing column {col_idx + 1}/{self.num_of_columns}")
 
-            if not self.raw_data.iloc[:, col_idx].isnull().any():
-                self._log(2, f'Imputation skipped, there is no null value')
-                self.__can_impute(col_idx, 1 if self.metric_direction else 0)
-                continue
+                if not self.raw_data.iloc[:, col_idx].isnull().any():
+                    self.__log(2, f'Imputation skipped, there is no null value')
+                    self.__can_impute(col_idx, 1 if self.metric_direction else 0)
+                    continue
 
-            is_column_updated, column_score = self.__process_each_column(imputer, col_idx)
+                is_column_updated, column_score = self.__process_each_column(imputer, col_idx)
 
-            if is_column_updated:
-                updated_column_count += 1
-            columns_scores_history['train'].append(column_score['train'])
-            columns_scores_history['val'].append(column_score['val'])
-        # self._log(1, f'{updated_column_count} columns updated')
-        self._log(1,
-                  f'Average {self.metric.__name__} train: {np.mean(columns_scores_history["train"])}, validation: {np.mean(columns_scores_history["val"])}')
+                if is_column_updated:
+                    updated_column_count += 1
+                columns_scores_history['train'].append(column_score['train'])
+                columns_scores_history['val'].append(column_score['val'])
+            # self._log(1, f'{updated_column_count} columns updated')
+            self.__log(1,
+                      f'Average {self.metric.__name__} train: {np.mean(columns_scores_history["train"])}, validation: {np.mean(columns_scores_history["val"])}')
 
-        return updated_column_count
-
+            return updated_column_count
+        except:
+            self.__log(0, 'Imputer skipped!')
     def __process_each_column(self, imputer, col_index: int) -> tuple[bool, dict[str, list[Any]]]:
         """
         Trains and evaluates the imputation model for a specific column.
@@ -220,36 +222,39 @@ class MissMixed:
             tuple[bool, dict[str, list[Any]]]: A tuple containing a boolean indicating if the column was updated
                                                and a dictionary of metric scores for training and testing.
         """
-        is_column_updated = False
-        column_score = {'train': [], 'val': []}
-        ds, impute_ds = self.__dataset_preparation(col_index)
-        if len(ds['y_test']) >= 2:
-            metric_scores, models = [], []
-            # Train model and select best model based score on test data
-            for _ in range(imputer.trials):
-                imputer.fit(ds['x_train'], ds['y_train'])
-                y_pred_train = np.maximum(imputer.predict(ds['x_train']), 0.0)
-                y_pred_test = np.maximum(imputer.predict(ds['x_test']), 0.0)
-                metric_scores.append(
-                    {
-                        'train': self.metric(ds['y_train'], y_pred_train),
-                        'val': self.metric(ds['y_test'], y_pred_test)
-                    }
-                )
-                models.append(imputer.copy())
+        try:
+            is_column_updated = False
+            column_score = {'train': [], 'val': []}
+            ds, impute_ds = self.__dataset_preparation(col_index)
+            if len(ds['y_test']) >= 2:
+                metric_scores, models = [], []
+                # Train model and select best model based score on test data
+                for _ in range(imputer.trials):
+                    imputer.fit(ds['x_train'], ds['y_train'])
+                    y_pred_train = np.maximum(imputer.predict(ds['x_train']), 0.0)
+                    y_pred_test = np.maximum(imputer.predict(ds['x_test']), 0.0)
+                    metric_scores.append(
+                        {
+                            'train': self.metric(ds['y_train'], y_pred_train),
+                            'val': self.metric(ds['y_test'], y_pred_test)
+                        }
+                    )
+                    models.append(imputer.copy())
 
-            best_index = np.argmax([m['val'] * self.metric_direction for m in metric_scores])
-            best_metric_score = metric_scores[best_index]
-            column_score['train'].append(best_metric_score['train'])
-            column_score['val'].append(best_metric_score['val'])
+                best_index = np.argmax([m['val'] * self.metric_direction for m in metric_scores])
+                best_metric_score = metric_scores[best_index]
+                column_score['train'].append(best_metric_score['train'])
+                column_score['val'].append(best_metric_score['val'])
 
-            self._log(2, f"Best {self.metric.__name__} results: {best_metric_score}")
-            if self.__can_impute(col_index, best_metric_score['val']):
-                self.__apply_best_model(models[best_index], impute_ds, col_index)
-                is_column_updated = True
-                self._log(2, '-- Column updated --')
+                self.__log(2, f"Best {self.metric.__name__} results: {best_metric_score}")
+                if self.__can_impute(col_index, best_metric_score['val']):
+                    self.__apply_best_model(models[best_index], impute_ds, col_index)
+                    is_column_updated = True
+                    self.__log(2, '-- Column updated --')
 
-        return is_column_updated, column_score
+            return is_column_updated, column_score
+        except:
+            self.__log(0, 'Imputation column skipped')
 
     def __can_impute(self, col_index: int, test_score: float) -> bool:
         """
@@ -365,14 +370,15 @@ class MissMixed:
         """
         for i in range(self.num_of_columns):
             if self.categorical_columns[i]:
-                self.imputed_df.iloc[:, i] = self.column_to_encoder[i].inverse_transform(self.imputed_df.iloc[:, i].astype('int64'))
+                self.imputed_df.iloc[:, i] = self.column_to_encoder[i].inverse_transform(
+                    self.imputed_df.iloc[:, i].astype('int64'))
 
         return {
             'imputed_data': self.imputed_df,
             'scores': self.max_metric_tests
         }
 
-    def _log(self, level, *message):
+    def __log(self, level, *message):
         """
         Logs messages based on the verbosity level.
 
