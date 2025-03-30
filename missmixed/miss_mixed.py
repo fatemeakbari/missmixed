@@ -176,10 +176,10 @@ class MissMixed:
         Returns:
             int: The number of columns updated in this iteration.
         """
-        try:
-            updated_column_count = 0
-            columns_scores_history = {'train': [], 'val': []}
-            for col_idx in range(self.num_of_columns):
+        updated_column_count = 0
+        columns_scores_history = {'train': [], 'val': []}
+        for col_idx in range(self.num_of_columns):
+            try:
                 self.shared.set_value('processing_col_idx', col_idx)
                 # todo need to refactor
                 is_categorical = self.categorical_columns[col_idx]
@@ -203,13 +203,14 @@ class MissMixed:
                     updated_column_count += 1
                 columns_scores_history['train'].append(column_score['train'])
                 columns_scores_history['val'].append(column_score['val'])
-            # self._log(1, f'{updated_column_count} columns updated')
-            self.__log(1,
-                      f'Average {self.metric.__name__} train: {np.mean(columns_scores_history["train"])}, validation: {np.mean(columns_scores_history["val"])}')
+            except:
+                self.__log(0, 'Imputation column skipped')
+        # self._log(1, f'{updated_column_count} columns updated')
+        self.__log(1,
+                  f'Average {self.metric.__name__} train: {np.mean(columns_scores_history["train"])}, validation: {np.mean(columns_scores_history["val"])}')
 
-            return updated_column_count
-        except:
-            self.__log(0, 'Imputer skipped!')
+        return updated_column_count
+
     def __process_each_column(self, imputer, col_index: int) -> tuple[bool, dict[str, list[Any]]]:
         """
         Trains and evaluates the imputation model for a specific column.
@@ -222,39 +223,37 @@ class MissMixed:
             tuple[bool, dict[str, list[Any]]]: A tuple containing a boolean indicating if the column was updated
                                                and a dictionary of metric scores for training and testing.
         """
-        try:
-            is_column_updated = False
-            column_score = {'train': [], 'val': []}
-            ds, impute_ds = self.__dataset_preparation(col_index)
-            if len(ds['y_test']) >= 2:
-                metric_scores, models = [], []
-                # Train model and select best model based score on test data
-                for _ in range(imputer.trials):
-                    imputer.fit(ds['x_train'], ds['y_train'])
-                    y_pred_train = np.maximum(imputer.predict(ds['x_train']), 0.0)
-                    y_pred_test = np.maximum(imputer.predict(ds['x_test']), 0.0)
-                    metric_scores.append(
-                        {
-                            'train': self.metric(ds['y_train'], y_pred_train),
-                            'val': self.metric(ds['y_test'], y_pred_test)
-                        }
-                    )
-                    models.append(imputer.copy())
+        is_column_updated = False
+        column_score = {'train': [], 'val': []}
+        ds, impute_ds = self.__dataset_preparation(col_index)
+        if len(ds['y_test']) >= 2:
+            metric_scores, models = [], []
+            # Train model and select best model based score on test data
+            for _ in range(imputer.trials):
+                imputer.fit(ds['x_train'], ds['y_train'])
+                y_pred_train = np.maximum(imputer.predict(ds['x_train']), 0.0)
+                y_pred_test = np.maximum(imputer.predict(ds['x_test']), 0.0)
+                metric_scores.append(
+                    {
+                        'train': self.metric(ds['y_train'], y_pred_train),
+                        'val': self.metric(ds['y_test'], y_pred_test)
+                    }
+                )
+                models.append(imputer.copy())
 
-                best_index = np.argmax([m['val'] * self.metric_direction for m in metric_scores])
-                best_metric_score = metric_scores[best_index]
-                column_score['train'].append(best_metric_score['train'])
-                column_score['val'].append(best_metric_score['val'])
+            best_index = np.argmax([m['val'] * self.metric_direction for m in metric_scores])
+            best_metric_score = metric_scores[best_index]
+            column_score['train'].append(best_metric_score['train'])
+            column_score['val'].append(best_metric_score['val'])
 
-                self.__log(2, f"Best {self.metric.__name__} results: {best_metric_score}")
-                if self.__can_impute(col_index, best_metric_score['val']):
-                    self.__apply_best_model(models[best_index], impute_ds, col_index)
-                    is_column_updated = True
-                    self.__log(2, '-- Column updated --')
+            self.__log(2, f"Best {self.metric.__name__} results: {best_metric_score}")
+            if self.__can_impute(col_index, best_metric_score['val']):
+                self.__apply_best_model(models[best_index], impute_ds, col_index)
+                is_column_updated = True
+                self.__log(2, '-- Column updated --')
 
-            return is_column_updated, column_score
-        except:
-            self.__log(0, 'Imputation column skipped')
+        return is_column_updated, column_score
+
 
     def __can_impute(self, col_index: int, test_score: float) -> bool:
         """
