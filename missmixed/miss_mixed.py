@@ -68,7 +68,8 @@ class MissMixed:
                  early_stopping: bool = False,
                  iter_per_stopping: int = 1,
                  tolerance_percentage: float = 0.1,
-                 verbose: Literal[0, 1, 2] = 0
+                 verbose: Literal[0, 1, 2] = 0,
+                 features_min=None
                  ):
         """
         Initializes the MissMixed class.
@@ -95,11 +96,22 @@ class MissMixed:
         self.iter_per_stopping = iter_per_stopping
         self.tolerance_percentage = tolerance_percentage
         self.shared = SharedData()
+        self.__set_features_min(features_min)
         self.__clean_working_data()
         self.__process_categorical_data()
         self.num_of_columns = self.working_data.shape[1]
         self.imputed_df = pd.DataFrame(SimpleImputer(strategy=initial_strategy).fit_transform(self.working_data))
         self.__init_metrics(metric)
+
+    def __set_features_min(self, features_min):
+        if isinstance(features_min, (int, float)):
+            self.features_min = [features_min] * self.raw_data.shape[1]
+        elif isinstance(features_min, list):
+            if len(features_min) != self.raw_data.shape[1]:
+                raise ValueError(f'len(features_min) must be equal to raw_data.shape[1]')
+            self.features_min = features_min
+        else:
+            self.features_min = [None] * self.raw_data.shape[1]
 
     def __clean_working_data(self):
         """
@@ -109,6 +121,7 @@ class MissMixed:
         columns_to_be_dropped = non_null_count_per_column[non_null_count_per_column <= 1].index
         for i in columns_to_be_dropped:
             del self.categorical_columns[i]
+            del self.features_min[i]
         if columns_to_be_dropped.size >= 1:
             self.__log(0, f'Columns with all NaN values {columns_to_be_dropped} are dropped')
         self.working_data.drop(columns=columns_to_be_dropped, inplace=True)
@@ -207,7 +220,7 @@ class MissMixed:
                 self.__log(0, 'Imputation column skipped')
         # self._log(1, f'{updated_column_count} columns updated')
         self.__log(1,
-                  f'Average {self.metric.__name__} train: {np.mean(columns_scores_history["train"])}, validation: {np.mean(columns_scores_history["val"])}')
+                   f'Average {self.metric.__name__} train: {np.mean(columns_scores_history["train"])}, validation: {np.mean(columns_scores_history["val"])}')
 
         return updated_column_count
 
@@ -254,7 +267,6 @@ class MissMixed:
 
         return is_column_updated, column_score
 
-
     def __can_impute(self, col_index: int, test_score: float) -> bool:
         """
         Checks if the imputation for a column should be performed based on the metric score.
@@ -282,6 +294,8 @@ class MissMixed:
             col_index (int): The index of the column to impute.
         """
         y_pred_to_impute = model.predict(impute_dataset['x'])
+        if self.features_min[col_index] is not None:
+            y_pred_to_impute = np.maximum(y_pred_to_impute, self.features_min[col_index])
         self.imputed_df.loc[impute_dataset['y'].index, col_index] = y_pred_to_impute
 
     def __set_metric(self):
