@@ -161,6 +161,7 @@ class MissMixed:
         self.categorical_metric = accuracy_score if metric == 'r2_accuracy' else mean_squared_error
 
         self.max_metric_tests = np.full(self.num_of_columns, -np.inf * self.metric_direction)
+        self.effective_columns = np.full(self.num_of_columns, 1)
 
     def fit_transform(self):
         """
@@ -205,13 +206,13 @@ class MissMixed:
                     continue
                 self.__log(2, f"Imputing column {col_idx + 1}/{self.num_of_columns}")
 
-                if not self.raw_data.iloc[:, col_idx].isnull().any():
+
+
+                is_column_updated, column_score, skip = self.__process_each_column(imputer, col_idx)
+
+                if skip:
                     self.__log(2, f'Imputation skipped, there is no null value')
-                    self.__can_impute(col_idx, 1 if self.metric_direction else 0)
                     continue
-
-                is_column_updated, column_score = self.__process_each_column(imputer, col_idx)
-
                 if is_column_updated:
                     updated_column_count += 1
                 columns_scores_history['train'].append(column_score['train'])
@@ -224,7 +225,7 @@ class MissMixed:
 
         return updated_column_count
 
-    def __process_each_column(self, imputer, col_index: int) -> tuple[bool, dict[str, list[Any]]]:
+    def __process_each_column(self, imputer, col_index: int) -> tuple[bool, dict[str, list[Any]], bool]:
         """
         Trains and evaluates the imputation model for a specific column.
 
@@ -232,14 +233,14 @@ class MissMixed:
             imputer: The imputer to use.
             col_index (int): The index of the column to process.
 
-        Returns:
-            tuple[bool, dict[str, list[Any]]]: A tuple containing a boolean indicating if the column was updated
-                                               and a dictionary of metric scores for training and testing.
+        Returns: tuple[bool, dict[str, list[Any]], bool]: A tuple containing a boolean indicating if the column was
+        updated and a dictionary of metric scores for training and testing. skip determine not need to impute column
         """
+        skip = False
         is_column_updated = False
         column_score = {'train': [], 'val': []}
         ds, impute_ds = self.__dataset_preparation(col_index)
-        if len(ds['y_test']) >= 2:
+        if len(ds['y_test']) >= 2 and len(impute_ds['x'] > 0):
             metric_scores, models = [], []
             # Train model and select best model based score on test data
             for _ in range(imputer.trials):
@@ -264,8 +265,10 @@ class MissMixed:
                 self.__apply_best_model(models[best_index], impute_ds, col_index)
                 is_column_updated = True
                 self.__log(2, '-- Column updated --')
-
-        return is_column_updated, column_score
+        else:
+            self.max_metric_tests[col_index] = None
+            skip = True
+        return is_column_updated, column_score, skip
 
     def __can_impute(self, col_index: int, test_score: float) -> bool:
         """
@@ -388,7 +391,8 @@ class MissMixed:
 
         return {
             'imputed_data': self.imputed_df,
-            'scores': self.max_metric_tests
+            'scores': self.max_metric_tests,
+            'avg_score': np.nanmean(self.max_metric_tests)
         }
 
     def __log(self, level, *message):

@@ -20,6 +20,6 @@ miss_mixed.fit_transform()
 
 result = miss_mixed.result()
 
-print('Average: ', np.mean(result['scores']))
+print('Average score: ', result['avg_score'])
 print(result['scores'])
 print(result['imputed_data'].head())
