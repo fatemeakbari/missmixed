@@ -417,14 +417,13 @@ class MissMixed:
         Returns:
             pd.DataFrame: The normalized DataFrame.
         """
-        cols_min = []
-        cols_max = []
         for idx, col_name in enumerate(col_names):
             if not self.categorical_columns[idx]:
                 col_min = df_x[col_name].min()
                 col_max = df_x[col_name].max()
-                cols_min.append(col_min)
-                cols_max.append(col_max)
+                if col_min == col_max:
+                    df_x[col_name] = 10
+                    continue
                 df_x[col_name] = ((df_x[col_name] - col_min) / (col_max - col_min)) * 10
 
         return df_x
