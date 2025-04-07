@@ -419,8 +419,8 @@ class MissMixed:
         """
         cols_min = []
         cols_max = []
-        for col_name in col_names:
-            if not self.shared.is_categorical():
+        for idx, col_name in enumerate(col_names):
+            if not self.categorical_columns[idx]:
                 col_min = df_x[col_name].min()
                 col_max = df_x[col_name].max()
                 cols_min.append(col_min)
