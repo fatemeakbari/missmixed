@@ -125,7 +125,7 @@ class DeepModelImputer:
         self.model.compile(optimizer=self.optimizer, loss=self.loss)
 
         return self.model.fit(X, y, batch_size=self.batch_size, epochs=self.epochs,
-                              callbacks=self.callbacks, verbose=True)
+                              callbacks=self.callbacks, verbose=False)
 
     def predict(self, X):
         """
