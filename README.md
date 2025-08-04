@@ -49,4 +49,5 @@ MIT License
 
 [1] M. M. Kalhori, M. Izadi, “A Novel Mixed-Method Approach to Missing Value Imputation: An Introduction to MissMixed”, 29th International Computer Conference, Computer Society of Iran (CSICC) – IEEE, 2025.
 
-[2] M. M. Kalhori, F. Akbari, M. Izadi, “MissMixed: An Adaptive and Configurable Framework for Iterative Missing Value Imputation”, IEEE Access, 2025 (under review).
+[2] M. M. Kalhori, M. Izadi, F. Akbari “MissMixed: An Adaptive, Extensible and Configurable Multi-Layer Framework for Iterative Missing Value Imputation”, IEEE Access, 2025 (under review).
+
