@@ -154,6 +154,10 @@ class Sequential:
         else:
             self.imputers.append(imputer)
 
+    def reset(self):
+        """Clears all imputers from the sequence."""
+        self.imputers = []
+
     def __build_default_imputers(self):
         """
         Builds default imputers with pre-configured models.

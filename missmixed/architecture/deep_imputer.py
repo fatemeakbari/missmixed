@@ -42,6 +42,7 @@ class DeepModelImputer:
                  callbacks=None,
                  shuffle=True,
                  optimizer=None,
+                 verbose=False,
                  loss=Union[
                      'categorical', 'sparse_categorical_crossentropy', 'mean_squared_error', 'mean_absolute_error'],
                  device: Literal['auto', 'cpu', 'cuda'] = 'auto'):
@@ -64,6 +65,7 @@ class DeepModelImputer:
         self.epochs = epochs
         self.callbacks = callbacks
         self.shuffle = shuffle
+        self.verbose = verbose
         self.optimizer = optimizer
         self.loss = loss
         self.shared = SharedData()
@@ -125,7 +127,7 @@ class DeepModelImputer:
         self.model.compile(optimizer=self.optimizer, loss=self.loss)
 
         return self.model.fit(X, y, batch_size=self.batch_size, epochs=self.epochs,
-                              callbacks=self.callbacks, verbose=False)
+                              callbacks=self.callbacks, verbose=self.verbose)
 
     def predict(self, X):
         """

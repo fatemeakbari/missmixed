@@ -27,7 +27,7 @@ Attributes:
     train_size (float): The proportion of the dataset to use for training (default: 0.9).
     verbose (Literal[0, 1, 2]): Verbosity level for logging (0: silent, 1: minimal, 2: detailed).
     early_stopping (bool): Whether to enable early stopping based on the number of updated columns.
-    patience (int): Number of iterations to consider for early stopping.
+    iter_per_stopping (int): Number of iterations to consider for early stopping.
     tolerance_percentage (float): Tolerance percentage for early stopping.
     shared (SharedData): An instance of `SharedData` for sharing information across methods.
     num_of_columns (int): The number of columns in the dataset.
@@ -36,7 +36,7 @@ Attributes:
     non_categorical_metric (callable): Metric function for numerical columns (e.g., R2 score or MSE).
     categorical_metric (callable): Metric function for categorical columns (e.g., accuracy or MSE).
     max_metric_tests (np.ndarray): Array to store the best metric scores for each column.
-    features_min(list | int): A list or an integer defining the minimum values allowed to impute each column. 
+
 Methods:
     __init__: Initializes the MissMixed class with the dataset, imputation models, and configuration.
     __clean_working_data: Drops columns with all NaN values from the dataset.
@@ -44,16 +44,16 @@ Methods:
     __init_metrics: Initializes the metric functions based on the specified metric.
     fit_transform: Performs the imputation process iteratively using the sequence of imputers.
     __process_each_imputer: Processes each imputer in the sequence and updates the imputed values.
-    __process_each_column: Trains and evaluates the imputation model for a specific column.
-    __can_impute: Checks if the imputation for a column should be performed based on the metric score.
+    process_each_column: Trains and evaluates the imputation model for a specific column.
+    can_impute: Checks if the imputation for a column should be performed based on the metric score.
     __apply_best_model: Applies the best model to impute missing values in a column.
     __set_metric: Sets the appropriate metric function based on the column type.
     __iteration_progress_bar: Returns a progress bar for the imputation iterations.
-    __check_early_stopping: Checks if early stopping criteria are met.
+    __check_early_stopping: Checks if early stopping conditions are met.
     __dataset_preparation: Prepares the dataset for training and imputation.
     result: Returns the imputed dataset and the best metric scores.
     _log: Logs messages based on the verbosity level.
-    __normalize: Normalizes numerical columns in the dataset.
+    normalize: Normalizes numerical columns in the dataset.
 """
 
 
@@ -66,7 +66,7 @@ class MissMixed:
                  initial_strategy: Literal['mean', 'median', 'most_frequent', 'constant'] = 'mean',
                  train_size: float = 0.9,
                  early_stopping: bool = False,
-                 patience: int = 1,
+                 iter_per_stopping: int = 1,
                  tolerance_percentage: float = 0.1,
                  verbose: Literal[0, 1, 2] = 0,
                  features_min=None
@@ -82,7 +82,7 @@ class MissMixed:
             initial_strategy (Literal['mean', 'median', 'most_frequent', 'constant']): The strategy for initial imputation (default: 'mean').
             train_size (float): The proportion of the dataset to use for training (default: 0.9).
             early_stopping (bool): Whether to enable early stopping (default: False).
-            patience (int): Number of iterations to consider for early stopping (default: 1).
+            iter_per_stopping (int): Number of iterations to consider for early stopping (default: 1).
             tolerance_percentage (float): Tolerance percentage for early stopping (default: 0.1).
             verbose (Literal[0, 1, 2]): Verbosity level for logging (default: 0).
         """
@@ -93,7 +93,7 @@ class MissMixed:
         self.train_size = train_size
         self.verbose = verbose
         self.early_stopping = early_stopping
-        self.patience = patience
+        self.iter_per_stopping = iter_per_stopping
         self.tolerance_percentage = tolerance_percentage
         self.shared = SharedData()
         self.__set_features_min(features_min)
@@ -178,8 +178,7 @@ class MissMixed:
             updated_columns_count.append(count)
 
             if self.__check_early_stopping(updated_columns_count):
-                print('Early stopping criteria hits!')
-                break
+                print('Early stopping condition hits!')
 
     def __process_each_imputer(self, imputer) -> int:
         """
@@ -219,7 +218,7 @@ class MissMixed:
                 columns_scores_history['train'].append(column_score['train'])
                 columns_scores_history['val'].append(column_score['val'])
             except:
-                self.__log(0, 'Imputation column skipped')
+                self.__log(2, 'Imputation skipped')
         # self._log(1, f'{updated_column_count} columns updated')
         self.__log(1,
                    f'Average {self.metric.__name__} train: {np.mean(columns_scores_history["train"])}, validation: {np.mean(columns_scores_history["val"])}')
@@ -329,17 +328,17 @@ class MissMixed:
 
     def __check_early_stopping(self, updated_columns_count: List[int]) -> bool:
         """
-        Checks if early stopping criteria are met.
+        Checks if early stopping conditions are met.
 
         Args:
             updated_columns_count (List[int]): A list of the number of columns updated in each iteration.
 
         Returns:
-            bool: True if early stopping criteria are met, False otherwise.
+            bool: True if early stopping conditions are met, False otherwise.
         """
         if self.early_stopping:
-            if len(updated_columns_count) >= self.patience:
-                for updated_columns in updated_columns_count[-1 * self.patience:]:
+            if len(updated_columns_count) >= self.iter_per_stopping:
+                for updated_columns in updated_columns_count[-1 * self.iter_per_stopping:]:
                     if updated_columns / self.num_of_columns > self.tolerance_percentage:
                         return False
                 return True

@@ -73,9 +73,6 @@ class CategoricalListMaker:
                 
         return categorical_list
 
-
-
-
 def train_test_split(X, y, train_size=0.9):
     train_test_split_len = int(len(X) * train_size)
     x_train = X[0: train_test_split_len]

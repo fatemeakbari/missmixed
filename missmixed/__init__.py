@@ -1,5 +1,20 @@
+"""
+MissMixed: A modular framework for missing data imputation.
 
-from missmixed.miss_mixed import MissMixed
-from missmixed.architecture import DeepModelImputer
-from missmixed.architecture import Sequential
-from missmixed.utils import CategoricalListMaker
+Provides flexible Iteration Architectures with support for classical ML
+and deep learning methods.
+"""
+
+from .miss_mixed import MissMixed
+from .architecture import DeepModelImputer, Sequential
+from .utils import CategoricalListMaker, DataFrameColumnRounder
+
+__all__ = [
+    "MissMixed",
+    "DeepModelImputer",
+    "Sequential",
+    "CategoricalListMaker",
+    "DataFrameColumnRounder"
+]
+
+__version__ = "1.0.0"
