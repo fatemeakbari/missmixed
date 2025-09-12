@@ -1,16 +1,15 @@
 [project]
 name = "missmixed"
-version = "1.0.0"
-description = "A modular framework for missing value imputation..."
+version = "1.0.1"
+description = "An Adaptive, Extensible and Configurable Multi-Layer Framework for Iterative Missing Value Imputation"
 readme = "README.md"
-requires-python = ">=3.9"
+requires-python = ">=3.10"
 license = { file = "LICENSE.txt" }
 authors = [
     { name = "Mohammad Mahdi Kalhori", email = "mohammad.mahdi.kalhor.99@gmail.com" },
     { name = "Fateme Akbari", email = "fatemeeakbari.97@gmail.com" },
 ]
 dependencies = [
-    "openpyxl>=3.1.0",
     "tqdm>=4.66",
     "pandas>=2.0.0",
     "numpy>=1.23",

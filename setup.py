@@ -9,19 +9,19 @@ print("Packages found:", packages)  # Debug print (helpful for you)
 
 setup(
     name="missmixed",
-    version="1.0.0",
+    version="1.0.1",
     packages=packages,
     author="Mohammad Mahdi Kalhori",
     author_email="mohammad.mahdi.kalhor.99@gmail.com",
     maintainer="Mohammad Mahdi Kalhori, Fateme Akbari",
     maintainer_email="mohammad.mahdi.kalhor.99@gmail.com, fatemeeakbari.97@gmail.com",
-    description="A modular framework for missing value imputation using flexible iteration architectures.",
+    description="An Adaptive, Extensible and Configurable Multi-Layer Framework for Iterative Missing Value Imputation",
     long_description=get_long_description(),
     long_description_content_type="text/markdown",
     keywords=['missing data', 'missing data imputation', 'machine learning', 'data science', 'preprocessing'],
     url="https://github.com/MohammadKlhr/missmixed",
 
-    python_requires='>=3.9',
+    python_requires='>=3.10',
     install_requires=[
         'tqdm>=4.66',
         'pandas>=2.0.0',
