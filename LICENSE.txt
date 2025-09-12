@@ -1,6 +1,6 @@
 MIT License
 
-Copyright (c) 2025 Mohammad Mahdi Kalhori
+Copyright (c) 2025 Mohammad Mahdi Kalhori and Fateme Akbari
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal

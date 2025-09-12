@@ -13,22 +13,24 @@ setup(
     packages=packages,
     author="Mohammad Mahdi Kalhori",
     author_email="mohammad.mahdi.kalhor.99@gmail.com",
+    maintainer="Mohammad Mahdi Kalhori, Fateme Akbari",
+    maintainer_email="mohammad.mahdi.kalhor.99@gmail.com, fatemeeakbari.97@gmail.com",
     description="A modular framework for missing value imputation using flexible iteration architectures.",
     long_description=get_long_description(),
     long_description_content_type="text/markdown",
     keywords=['missing data', 'missing data imputation', 'machine learning', 'data science', 'preprocessing'],
     url="https://github.com/MohammadKlhr/missmixed",
 
-    python_requires='>=3.10',
+    python_requires='>=3.9',
     install_requires=[
-        'openpyxl==3.1.0',
-        'tqdm==4.66',
+        'tqdm>=4.66',
         'pandas>=2.0.0',
         "numpy>=1.23",
         'scikit-learn>=1.4',
+        'scipy>=1.6.0',
     ],
     extras_require={
-        "ml": ["xgboost>=2.0"],
+        "ml": ["xgboost>=3.0"],
         "deep": ["tensorflow>=2.12"]
     },
     entry_points={

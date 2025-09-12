@@ -3,21 +3,23 @@ name = "missmixed"
 version = "1.0.0"
 description = "A modular framework for missing value imputation..."
 readme = "README.md"
-requires-python = ">=3.10"
+requires-python = ">=3.9"
 license = { file = "LICENSE.txt" }
 authors = [
-    { name = "Mohammad Mahdi Kalhori", email = "mohammad.mahdi.kalhor.99@gmail.com" }
+    { name = "Mohammad Mahdi Kalhori", email = "mohammad.mahdi.kalhor.99@gmail.com" },
+    { name = "Fateme Akbari", email = "fatemeeakbari.97@gmail.com" },
 ]
 dependencies = [
     "openpyxl>=3.1.0",
     "tqdm>=4.66",
     "pandas>=2.0.0",
     "numpy>=1.23",
-    "scikit-learn>=1.4"
+    "scikit-learn>=1.4",
+    "scipy>=1.6.0",
 ]
 
 [project.optional-dependencies]
-ml = ["xgboost>=2.0"]
+ml = ["xgboost>=3.0"]
 deep = ["tensorflow>=2.12"]
 
 [project.scripts]

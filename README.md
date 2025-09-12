@@ -23,7 +23,7 @@ pip install missmixed
 
 ### 📦 Requirements
 
-- Python ≥ 3.10
+- Python ≥ 3.9
 - NumPy
 - Pandas
 - scikit-learn
