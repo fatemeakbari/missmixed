@@ -23,7 +23,7 @@ pip install missmixed
 
 ### 📦 Requirements
 
-- Python ≥ 3.8
+- Python ≥ 3.10
 - NumPy
 - Pandas
 - scikit-learn
@@ -44,10 +44,8 @@ Trial-based imputation workflows
 
 MIT License
 
-
 ### 📣 Citation
 
 [1] M. M. Kalhori, M. Izadi, “A Novel Mixed-Method Approach to Missing Value Imputation: An Introduction to MissMixed”, 29th International Computer Conference, Computer Society of Iran (CSICC) – IEEE, 2025.
 
 [2] M. M. Kalhori, M. Izadi, F. Akbari “MissMixed: An Adaptive, Extensible and Configurable Multi-Layer Framework for Iterative Missing Value Imputation”, IEEE Access, 2025 (under review).
-

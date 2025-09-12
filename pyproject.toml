@@ -1,3 +1,24 @@
-[build-system]
-requires = ["setuptools>=42", "wheel"]
-build-backend = "setuptools.build_meta"
+[project]
+name = "missmixed"
+version = "1.0.0"
+description = "A modular framework for missing value imputation..."
+readme = "README.md"
+requires-python = ">=3.10"
+license = { file = "LICENSE.txt" }
+authors = [
+    { name = "Mohammad Mahdi Kalhori", email = "mohammad.mahdi.kalhor.99@gmail.com" }
+]
+dependencies = [
+    "openpyxl>=3.1.0",
+    "tqdm>=4.66",
+    "pandas>=2.0.0",
+    "numpy>=1.23",
+    "scikit-learn>=1.4"
+]
+
+[project.optional-dependencies]
+ml = ["xgboost>=2.0"]
+deep = ["tensorflow>=2.12"]
+
+[project.scripts]
+missmixed = "missmixed.run:main"

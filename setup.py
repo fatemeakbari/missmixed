@@ -21,15 +21,15 @@ setup(
 
     python_requires='>=3.10',
     install_requires=[
-        'openpyxl==3.1.3',
-        'tqdm==4.67.1',
+        'openpyxl==3.1.0',
+        'tqdm==4.66',
         'pandas>=2.0.0',
-        "numpy>=1.22",
-        'scikit-learn>=1.6.0',
+        "numpy>=1.23",
+        'scikit-learn>=1.4',
     ],
     extras_require={
         "ml": ["xgboost>=2.0"],
-        "deep": ["tensorflow>=2.0"]
+        "deep": ["tensorflow>=2.12"]
     },
     entry_points={
         'console_scripts': [
