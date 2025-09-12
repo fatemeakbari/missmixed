@@ -6,11 +6,11 @@ from tensorflow import keras
 
 
 # Initialize data, sequential model, and categorical columns
-reference_data = pd.read_excel('LetterRecognition_MCAR_25.xlsx')
-categorical_list_maker = CategoricalListMaker(reference_data)
-print(reference_data.columns)
+data = pd.read_excel('LetterRecognition_MCAR_25.xlsx')
+categorical_list_maker = CategoricalListMaker(data)
+print(data.columns)
 categorical_columns = categorical_list_maker.make_categorical_list(
-    categorical_index=[i for i in range(reference_data.shape[1])])
+    categorical_index=[i for i in range(data.shape[1])])
 
 
 model = keras.Sequential()
@@ -38,7 +38,7 @@ base_model.add(regression_imputer=regression_imputer,
                classification_imputer=classification_imputer, trials=1, index=0)
 
 # Create and run the MissMixed instance
-miss_mixed = MissMixed(reference_data, initial_strategy='mean', sequential=base_model,
+miss_mixed = MissMixed(data, initial_strategy='mean', sequential=base_model,
                        categorical_columns=categorical_columns, train_size=0.9, verbose=2)
 miss_mixed.fit_transform()
 
@@ -47,9 +47,8 @@ result = miss_mixed.result()
 
 print('Average score: ', result['avg_score'])
 print(result['scores'])
-print(result['imputed_data'].head())
 
+imputed_data = result['imputed_data']
+imputed_data.columns = data.columns  # Specifying that the column names of the imputed df must be as they are in the original data
 
-
-
-
+print(imputed_data.head())

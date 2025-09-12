@@ -3,12 +3,11 @@ import numpy as np
 from missmixed import MissMixed, Sequential, CategoricalListMaker, DataFrameColumnRounder
 
 # Initialize data, sequential model, and categorical columns
-data = pd.read_excel('LetterRecognition_MCAR_25.xlsx')
+data = pd.read_excel('Breast_Cancer_MCAR_10.xlsx')
 categorical_list_maker = CategoricalListMaker(data)
-# categorical_columns = categorical_list_maker.make_categorical_list(categorical_columns=['xbox ', 'x2bar'])
-categorical_columns = categorical_list_maker.make_categorical_list(non_categorical_index=[])  # All columns are categorical
+categorical_columns = categorical_list_maker.make_categorical_list()
 
-base_model = Sequential()
+base_model = Sequential(trials=2)
 
 # Create and run the MissMixed instance
 miss_mixed = MissMixed(data, initial_strategy='mean', sequential=base_model, metric='r2_accuracy',
@@ -22,8 +21,5 @@ print(result['scores'])
 
 imputed_data = result['imputed_data']
 imputed_data.columns = data.columns  # Specifying that the column names of the imputed df must be as they are in the original data
-
-column_rounder = DataFrameColumnRounder(imputed_data)  # Rounding float numbers to integers for categorical columns
-imputed_data = column_rounder.round_columns(['xbox ', 'ybox ', 'width ', 'height', 'onpix ', 'xbar ', 'ybar ', 'x2bar', 'y2bar ', 'xybar ', 'x2ybar', 'xy2bar', 'xedge ', 'xedgey', 'yedge ', 'yedgex'])
 
 print(imputed_data.head())
