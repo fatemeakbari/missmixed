@@ -35,12 +35,38 @@ Dependencies will be installed automatically via pip.
 
 ### 📖 Usage
 
-See the examples folder for how to define:
+See the [example](./examples) folder for how to define:
 Custom Iteration Architectures
 Mixed-type pipelines
 Trial-based imputation workflows
 
-### 📄 License
+OR
+
+Use Command-Line Interface (CLI)
+
+```bash
+ missmixed --path .\input_data.csv
+```
+
+#### 💻 MissMixed CLI Options
+
+The following table lists **all command-line arguments** for MissMixed:
+
+| Argument | Short | Type | Default | Description |
+|----------|-------|------|---------|-------------|
+| `--path` | `-p` | `str` | **required** | Path to the input data file (CSV or XLSX). |
+| `--categorical-columns` | `-cat-col` | `str (list)` | `None` | Names of categorical columns (space-separated). Only one of the column options can be used. If none are provided, all columns are treated as continuous (default). |
+| `--categorical-index` | `-cat-idx` | `int (list)` | `None` | Indices of categorical columns (space-separated). Only one of the column options can be used. |
+| `--continuous-columns` | `-con-col` | `str (list)` | `None` | Names of continuous (non-categorical) columns (space-separated). Only one of the column options can be used. |
+| `--continuous-index` | `-con-idx` | `int (list)` | `None` | Indices of continuous (non-categorical) columns (space-separated). Only one of the column options can be used. |
+| `--initial-strategy` | `-s` | `str` | `mean` | Initial strategy for filling NaN values. Choices: `mean`, `median`, `most_frequent`. |
+| `--metric` | `-m` | `str` | `r2_accuracy` | Metric for model evaluation. Choices: `r2_accuracy`, `mse`. |
+| `--trials` | `-t` | `int` | `1` | Number of trials for training imputers through all iterations. |
+| `--train-size` | `-ts` | `float` | `0.9` | Train size ratio (validation size = `1 - train_size`). |
+| `--verbose` | `-v` | `int` | `0` | Verbosity level: `0` (silent), `1` (default), `2` (detailed). |
+| `--output` | `-o` | `str` | `imputed_data.csv` | Path to save the imputed output file. |
+
+## 📄 License
 
 MIT License
 
